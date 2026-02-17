@@ -1,0 +1,12 @@
+.venv
+.vscode
+database/
+migrations/
+logs/*
+dags/__pycache__
+README.md
+notebook.ipynb
+uv.lock
+pyproject.toml
+.python-version
+main.py
