@@ -15,3 +15,5 @@ logs/*
 database/*.sql-shm
 database/*.sql-wal
 migrations/logs/*
+migrations/*.db-shm
+migrations/*.db-wal
