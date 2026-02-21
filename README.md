@@ -19,7 +19,10 @@ A melhor maneira de rodar `dev` no Windows é usando o [WSL](https://learn.micro
 ## dev
 
 ```bash
+# 1ª vez
+uv sync
 make migrate
+# startar
 make start
 ```
 **Configs após `make migrate` em [airflow.cfg](./migrations/airflow.cfg):**
