@@ -5,13 +5,9 @@ Dois ambientes:
 - **dev:** usa `uv` + `Makefile`
 - **prod:** usa `pip` + `docker-compose`
 
-O Airflow não roda nativamente no windows, por isso a melhor maneira de rodar `dev` é usando o [WSL](https://learn.microsoft.com/pt-br/windows/wsl/install). O que significa que todo o projeto ficará dentro da distro (alterações, versionamento, etc). O melhor fluxo é para esse ambiente é:
+O Airflow não roda nativamente no windows, por isso a melhor maneira de rodar `dev` é usando o [WSL](https://learn.microsoft.com/pt-br/windows/wsl/install). O que significa que todo o projeto deve ser desenvolvido dentro da distro (muito por conta de compatibilidade de Makefile, push/pull, etc).
 
-- rodar wsl
-- copiar projeto para dentro da distro
-- fazer alterações
-- push no wsl
-- pull no windows
+Carregamentos de exemplos do Airflow foram [desabilitados](./migrations/airflow.cfg#L156). [Porta para standalone](./migrations/airflow.cfg#L1253) foi alterada para 8081. [Porta de prod](./docker-compose.yaml#L51) se mantém em 8080.
 
 ## Config inicial
 
@@ -58,42 +54,26 @@ cp -r "/mnt/c/Users/vitor/Desktop/airflow" ~/"Área de trabalho"
 ### prod
 
 - Docker
+- configurar `.env`
 - `docker-compose up -d`
 - `Webserver` abre em [localhost:8080](http://localhost:8080)
 
-# Start
-
-**3. Configurar pasta do projeto dentro da distro:**
-
-- Abra o terminal e rode `wsl`
-- Copiar o projeto montado dentro de `mnt` para dentro da pasta certa (ex: `cp -r /mnt/c/Users/vitor/Desktop/airflow ~/"Área de trabalho"`)
-- Navegue até a pasta do projeto (ex: `cd ~/"Área de trabalho/airflow"`)
-- Crie o venv e instale as dependências: `uv sync`
-- Rode `make start`
-- `Webserver` abre em [localhost:8081](http://localhost:8081)
-- Na pasta `migrations` configurada no Makefile para o Airflow standalone, terá as credenciais [criadas pelo Airflow](./migrations/simple_auth_manager_passwords.json.generated).
-- **Notas:** Possivelmente será necessário instalar alguma lib Linux (make, git, etc). O path do projeto no wsl deve ser como confgurado no [airflow.cfg](./migrations/airflow.cfg#L8).
+## Start
 
 ### dev
 
+Na IDE, conectar no wsl remoto e depois:
+
 ```bash
-# 1ª vez
-make migrate
-# startar
-uv sync
 make start
 ```
-**Configs após `make migrate` em [airflow.cfg](./migrations/airflow.cfg):**
 
-- Porta do [Airflow Webserver](./migrations/airflow.cfg#L1253) em 8081.
-- Desabilitado [carregamento de exemplos](./migrations/airflow.cfg#L156).
+`Webserver` abre em [localhost:8081](http://localhost:8081).
 
-
+Sempre operar dentro do ambiente `dev` (wsl) para evitar conflitos com o windows. Todos os arquivos devem ser criados e editados dentro da distro. Uma fez copiado o projeto para dentro da distro, não é mais necessário acessar o windows. Edições, push/pull devem ser feitos dentro da distro.
 
 ### prod
 
 ```bash
 ducker-compose up -d
 ```
-
-Porta do [Airflow Webserver](./docker-compose.yaml#L51) em 8080.
