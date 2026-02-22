@@ -19,6 +19,6 @@ database/*.db-shm
 database/*.db-wal
 database/*.sql-shm
 database/*.sql-wal
-migration/logs/*
-migration/*.db-shm
-migration/*.db-wal
+
+# airflow
+airflow/logs/*

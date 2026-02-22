@@ -39,7 +39,7 @@ services:
   # Anchor com '&anchor-name'
   airflow-common: &airflow-common
     build:
-      context: ./docker/Dockerfiles
+      context: ./dockerfiles
       dockerfile: Dockerfile.airflow
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
