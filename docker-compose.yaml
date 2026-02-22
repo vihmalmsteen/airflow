@@ -1,15 +1,18 @@
 services:
   # db de etl
-  mysql-dest:
+  mysql:
     image: mysql:8.0.44
-    container_name: mysql-prod-local
+    container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    hostname: ${MYSQL_HOST}
     ports:
-      - "3307:3306"
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - mysql:/var/lib/mysql
     networks:
       - airflow-net
   postgres:
@@ -19,9 +22,9 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    hostname: ${HOST}
-    expose:
-      - "${PORT}"
+    hostname: ${POSTGRES_HOST}
+    ports:
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres:/var/lib/postgresql/data
     restart: unless-stopped
@@ -35,32 +38,41 @@ services:
 
   # Anchor com '&anchor-name'
   airflow-common: &airflow-common
-    image: apache/airflow:3.1.7-python3.12
+    build:
+      context: ./docker/Dockerfiles
+      dockerfile: Dockerfile.airflow
     environment:
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${HOST}:${PORT}/${POSTGRES_DB}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       - AIRFLOW__CORE__AUTH_MANAGER=airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__CORE__LOAD_EXAMPLES=false
       - _AIRFLOW_DB_MIGRATE=true
-      - _AIRFLOW_WWW_USER_CREATE=true
-      - _AIRFLOW_WWW_USER_USERNAME=${AIRFLOW_WWW_USER_USERNAME}
-      - _AIRFLOW_WWW_USER_PASSWORD=${AIRFLOW_WWW_USER_PASSWORD}
+      - AIRFLOW__CORE__TEST_CONNECTION=Enabled
       - AIRFLOW_CONN_MYSQL_DEFAULT=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
     volumes:
-      - ./dags:/opt/airflow/dags:Z
-      - ./logs:/opt/airflow/logs:Z
-      - ./plugins:/opt/airflow/plugins:Z
+      - ./airflow:/opt/airflow:Z
     user: "${AIRFLOW_UID:-50000}:0"
     depends_on:
       postgres:
         condition: service_healthy
+      mysql:
+        condition: service_started
     networks:
       - airflow-net
-    # install pip pkgs
+
+  init-airflow:
+    <<: *airflow-common
+    container_name: airflow-init
+    entrypoint: /bin/bash
     command: >
-      bash -c "pip install apache-airflow-providers-mysql && \
-      pip install apache-airflow-providers-postgres && \
-      pip install apache-airflow-providers-sqlite
+      -c "airflow db migrate && \
+      airflow users create \
+      --role Admin \
+      --username ${AIRFLOW_USER_USERNAME} \
+      --password ${AIRFLOW_USER_PASSWORD} \
+      --firstname ${AIRFLOW_USER_FIRSTNAME} \
+      --lastname ${AIRFLOW_USER_LASTNAME} \
+      --email ${AIRFLOW_USER_EMAIL}"
 
   api-server:
     <<: *airflow-common
@@ -79,10 +91,10 @@ services:
     command: dag-processor
     container_name: airflow-dag-processor
 
-  # triggerer:
-  #   <<: *airflow-common
-  #   command: triggerer
-  #   container_name: airflow-triggerer
+  triggerer:
+    <<: *airflow-common
+    command: triggerer
+    container_name: airflow-triggerer
 
 networks:
   airflow-net:
@@ -90,3 +102,4 @@ networks:
 
 volumes:
   postgres:
+  mysql:
