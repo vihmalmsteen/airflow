@@ -1,4 +1,17 @@
 services:
+  # db de etl
+  mysql-dest:
+    image: mysql:8.0.44
+    container_name: mysql-prod-local
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306"
+    networks:
+      - airflow-net
   postgres:
     image: postgres:17.4-alpine3.21
     container_name: postgres
@@ -32,6 +45,7 @@ services:
       - _AIRFLOW_WWW_USER_CREATE=true
       - _AIRFLOW_WWW_USER_USERNAME=${AIRFLOW_WWW_USER_USERNAME}
       - _AIRFLOW_WWW_USER_PASSWORD=${AIRFLOW_WWW_USER_PASSWORD}
+      - AIRFLOW_CONN_MYSQL_DEFAULT=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
     volumes:
       - ./dags:/opt/airflow/dags:Z
       - ./logs:/opt/airflow/logs:Z
@@ -42,6 +56,11 @@ services:
         condition: service_healthy
     networks:
       - airflow-net
+    # install pip pkgs
+    command: >
+      bash -c "pip install apache-airflow-providers-mysql && \
+      pip install apache-airflow-providers-postgres && \
+      pip install apache-airflow-providers-sqlite
 
   api-server:
     <<: *airflow-common

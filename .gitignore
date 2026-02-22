@@ -13,8 +13,12 @@ uv.lock
 # others
 .env
 logs/*
+database/*.sqlite-shm
+database/*.sqlite-wal
+database/*.db-shm
+database/*.db-wal
 database/*.sql-shm
 database/*.sql-wal
-migrations/logs/*
-migrations/*.db-shm
-migrations/*.db-wal
+migration/logs/*
+migration/*.db-shm
+migration/*.db-wal

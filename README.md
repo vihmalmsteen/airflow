@@ -26,7 +26,10 @@ wsl --set-default-version 2                 # define a versão do wsl
 wsl                                         # Entrando na vm via terminal
 
 # ubuntu
-sudo apt update && sudo apt install make    # Instalar dependência `make` pra rodar `Makefile`
+sudo apt update && sudo apt upgrade
+# Instalar deps pra Makefile e compiladores C para mysql provider do airflow
+sudo apt install make
+sudo apt install -y pkg-config default-libmysqlclient-dev build-essential
 ```
 
 **2. Criar pasta do projeto dentro da distro de acordo com o diretório configurado no [airflow.cfg](./migrations/airflow.cfg#L8), dar permissões e copiar do windows:**
@@ -70,10 +73,10 @@ make start
 
 `Webserver` abre em [localhost:8081](http://localhost:8081).
 
-Sempre operar dentro do ambiente `dev` (wsl) para evitar conflitos com o windows. Todos os arquivos devem ser criados e editados dentro da distro. Uma fez copiado o projeto para dentro da distro, não é mais necessário acessar o windows. Edições, push/pull devem ser feitos dentro da distro.
+Sempre operar dentro do ambiente `dev` (wsl) para evitar conflitos com o windows. Todos os arquivos devem ser criados e editados dentro da distro. Uma vez copiado o projeto para dentro da distro, não é mais necessário acessar o windows. Edições, push/pull devem ser feitos dentro da distro.
 
 ### prod
 
 ```bash
-ducker-compose up -d
+docker-compose up -d
 ```

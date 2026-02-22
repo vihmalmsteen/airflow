@@ -1,7 +1,9 @@
 .venv
 .vscode
 database/
-migrations/
+migration/logs/*
+migration/*.db-shm
+migration/*.db-wal
 logs/*
 dags/__pycache__
 README.md

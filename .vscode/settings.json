@@ -1,17 +1,2 @@
 {
-    "dbcode.connections": [
-        {
-            "connectionId": "ZaMWRv61AfjNTpiYi06gP",
-            "name": "database",
-            "driver": "sqlite",
-            "connectionType": "socket",
-            "socket": "airflow/database/database.sql",
-            "readOnly": false,
-            "postConnectionSqlType": "inline",
-            "driverOptions": {
-                "extensions": []
-            },
-            "idleTimeout": 0
-        }
-    ]
 }
