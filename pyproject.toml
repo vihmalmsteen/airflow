@@ -14,5 +14,4 @@ dependencies = [
     "psycopg2-binary==2.9.11",
     "pymysql==1.1.2",
     "sqlalchemy==2.0.46",
-    "uv>=0.10.4",
 ]
